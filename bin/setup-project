@@ -1,0 +1,52 @@
+#!/bin/bash
+GIT=""
+BRANCH=""
+DATABASE=""
+ENV_FILE=""
+BASE_URL=""
+
+green=$(tput setaf 2)
+blue=$(tput setaf 4)
+normal=$(tput sgr0)
+
+#URL, GIT, BRANCH ,DATABASE, env.php
+read -p "GIT URL: " -e GIT
+read -p "GIT Branch: " -e BRANCH
+read -p "DATABASE (you can leave it empty to skip the sql import): " -e DATABASE
+#read -p "ENV File: " -e ENV_FILE
+read -p "BASE URL: " -e BASE_URL
+
+if [ -n "$BASE_URL" ];
+then
+    echo "${green}Pull the code & switch branch...${normal}"
+    bin/git-pull $GIT $BRANCH
+    echo "Restart containers to mount files..."
+    bin/stop
+    bin/start
+    sleep 3
+    bin/restart
+    sleep 2
+    if [ -z "$DATABASE" ]
+    then
+        echo "${blue}Skip database import...${normal}"
+    else
+        echo "${green}Import database...${normal}"
+        bin/mysql-import $DATABASE
+    fi
+    #echo "${green}copy env.php file...${normal}"
+    #cp $ENV_FILE src/app/etc/
+    echo "Copying all files from host to container..."
+    rm -rf src/vendor #Clear for step below
+    bin/copytocontainer --all
+
+    echo "Create a DNS host entry for the site..."
+    echo "127.0.0.1 ::1 $BASE_URL" | sudo tee -a /etc/hosts
+
+    echo "Generating SSL certificate..."
+    bin/setup-ssl $BASE_URL
+
+    echo "${green}Docker development environment setup complete.${normal}"
+    echo "You may now access your Application frontend instance at ${green}https://${BASE_URL}/${normal}"
+else
+    echo "All fields above are required to setup, please fill..."
+fi

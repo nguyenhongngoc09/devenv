@@ -1,0 +1,28 @@
+#!/bin/bash
+source env/db.env
+
+if [ "$1" == "install" ]; then
+    echo 'Downloading Wordpress'
+    bin/cli curl -sS -o wordpress.tar.gz https://wordpress.org/latest.tar.gz
+    echo "Wordpress downloaded"
+    bin/cli tar -xzf wordpress.tar.gz
+    bin/cli mv -f wordpress/* . && rm -rf wordpress
+    echo "Wordpress Installed"
+    bin/cli rm -rf wordpress.tar.gz
+elif [ "$1" == "uninstall" ]; then
+  bin/cli rm -rf ./*
+  echo "Wordpress has been removed."
+
+elif [ "$1" == "setup" ]; then
+    # Check WP is install yet
+    if ! [ -d src ]; then
+        bin/wordpress install
+    fi
+
+    if [ -e env/wp-config.php ]; then
+        cp env/wp-config.php ./
+    fi
+
+else
+  echo "Please specify either 'install' or 'uninstall' as an argument"
+fi
