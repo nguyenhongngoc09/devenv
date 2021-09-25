@@ -17,6 +17,17 @@ bin/setup-project
 
 All bash cmd you need in the "bin" folder
 
+- Database information in 'env/db.env'
+- You can create some folders:
+
+```bash
+mysql/dbdata/
+logs/
+src
+```
+
+'src' is folder contain your source code to run in docker containers
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
