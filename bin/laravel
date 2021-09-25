@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ "$1" == "install" ]; then
+    echo 'Installing Laravel via composer'
+    bin/cli composer create-project --prefer-dist laravel/laravel:7.* .
+    bin/cli composer install
+    echo "Laravel project has been installed successfully"
+elif [ "$1" == "uninstall" ]; then
+  bin/cli rm -rf ./*
+  echo "Laravel has been removed."
+else
+  echo "Please specify either 'install' or 'uninstall' as an argument"
+fi

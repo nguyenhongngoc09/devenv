@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ "$1" == "install" ]; then
+  echo 'Installing Symfony via symfony cli'
+  bin/cli composer create-project symfony/skeleton .
+  echo "Symfony project has been installed successfully"
+elif [ "$1" == "uninstall" ]; then
+  bin/cli rm -rf ./*
+  echo "Symfony has been removed."
+
+else
+  echo "Please specify either 'install' or 'uninstall' as an argument"
+fi

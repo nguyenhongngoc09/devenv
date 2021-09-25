@@ -1,6 +1,4 @@
-# Version 1.0.0
-
-version: "3"
+version: "3.8"
 
 services:
   app:
@@ -12,8 +10,8 @@ services:
       - db
       - phpfpm
     volumes: &appvolumes
-      #- ~/.composer:/var/www/.composer:delegated
-      - appdata:/var/www/html
+      - ./src:/var/www/html:cached
+      - ./logs:/var/log/nginx:delegated
       # - native-osx-sync:/var/www/html:nocopy
       - sockdata:/sock
       - ssldata:/etc/nginx/certs
@@ -31,7 +29,7 @@ services:
     env_file: env/db.env
     command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - ./mysql/dbdata:/var/lib/mysql
+      - ./mysql/dbdata:/var/lib/mysql:delegated
 
   # redis:
   #   image: redis:${REDIS_VERSION}
@@ -52,27 +50,26 @@ services:
 #    volumes:
 #      - rabbitmqdata:/var/lib/rabbitmq
 
-  mailhog:
-    image: mailhog/mailhog:latest
-    ports:
-      - "1025:1025"
-      - "8025:8025"
+# mailhog:
+#   image: mailhog/mailhog:latest
+#   ports:
+#     - "1025:1025"
+#     - "8025:8025"
 
-  # Disabling cron by default as it uses higher CPU, enable if needed
-  #cron:
-  #  image: images/php/${PHP_VERSION}
-  #  user: root
-  #  command: /usr/local/bin/cronstart
-  #  tty: true
-  #  links:
-  #    - db
-  #  volumes: *appvolumes
+# Disabling cron by default as it uses higher CPU, enable if needed
+#cron:
+#  image: images/php/${PHP_VERSION}
+#  user: root
+#  command: /usr/local/bin/cronstart
+#  tty: true
+#  links:
+#    - db
+#  volumes: *appvolumes
 
 volumes:
-  appdata:
   # native-osx-sync:
-    # external: true
-  dbdata:
-#  rabbitmqdata:
+  #   external: true
+  # dbdata:
+  # rabbitmqdata:
   sockdata:
   ssldata:
