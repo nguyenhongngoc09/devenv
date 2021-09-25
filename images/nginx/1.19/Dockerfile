@@ -1,4 +1,4 @@
-FROM nginx:1.18
+FROM nginx:1.19
 
 RUN groupadd -g 1000 app \
  && useradd -g 1000 -u 1000 -d /var/www -s /bin/bash app
@@ -21,8 +21,6 @@ RUN ( \
 
 COPY ./conf/nginx.conf /etc/nginx/
 COPY ./conf/default.conf /etc/nginx/conf.d/
-#RUN mkdir -p /etc/nginx/includes
-#COPY ./conf/magento/nginx.sample.conf /etc/nginx/includes/
 
 RUN mkdir -p /etc/nginx/html /var/www/html \
   && chown -R app:app /etc/nginx /var/www /var/cache/nginx /var/run/nginx.pid /sock

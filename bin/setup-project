@@ -2,7 +2,7 @@
 GIT=""
 BRANCH=""
 DATABASE=""
-ENV_FILE=""
+# ENV_FILE=""
 BASE_URL=""
 
 green=$(tput setaf 2)
