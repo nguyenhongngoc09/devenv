@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+
+logs/
+mysql/
+projects/
