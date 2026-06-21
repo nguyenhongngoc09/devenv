@@ -1,13 +1,15 @@
 #!/bin/bash
-[ -z "$1" ] && echo "Please specify the git repository(ssh)..." && exit
+[ -z "$1" ] && echo "Please specify the git repository URL" && exit
 GIT_BRANCH=${2:-develop}
-#Make sure src folder exists
-mkdir -p src
-REAL_SRC=$(cd -P "src" && pwd)
+PROJECT_FOLDER=${3:-$(basename "${1%.git}")}
+PROJECT_FOLDER=${PROJECT_FOLDER##*/}
+PROJECT_FOLDER=${PROJECT_FOLDER:-project}
 
-cd $REAL_SRC
+mkdir -p "projects/$PROJECT_FOLDER"
+REAL_SRC=$(cd -P "projects/$PROJECT_FOLDER" && pwd)
+
+cd "$REAL_SRC"
 git init
 git remote add origin $1
 git checkout -b $GIT_BRANCH
 git pull origin $GIT_BRANCH
-

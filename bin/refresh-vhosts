@@ -1,0 +1,2 @@
+#!/bin/bash
+docker compose exec -u root app sh -lc '/docker-entrypoint.d/40-generate-project-vhosts.sh && nginx -s reload'

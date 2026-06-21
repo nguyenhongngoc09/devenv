@@ -1,0 +1,127 @@
+FROM arm64v8/php:8.1.7-fpm
+
+RUN apt-get update && apt-get install -y \
+  zlib1g-dev \
+  g++ \
+  curl \
+  cron \
+  git \
+  gzip \
+  libbz2-dev \
+  libfreetype6-dev \
+  libicu-dev \
+  libjpeg62-turbo-dev \
+  libmcrypt-dev \
+  libpng-dev \
+  libssh2-1-dev \
+  libxslt1-dev \
+  libzip-dev \
+  lsof \
+  default-mysql-client \
+  vim \
+  zip \
+  unzip
+
+RUN apt-get install -y \
+  libcurl4-openssl-dev \
+  libonig-dev
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-configure zip
+
+RUN docker-php-ext-install \
+  bcmath \
+  ctype \
+  curl \
+  dom \
+  gd \
+  iconv \
+  intl \
+  mbstring \
+  pdo_mysql \
+  simplexml \
+  soap \
+  xsl \
+  zip \
+  sockets \
+  bz2 \
+  calendar \
+  exif \
+  gettext \
+  mysqli \
+  opcache \
+  pcntl \
+  sysvmsg \
+  sysvsem \
+  sysvshm
+
+RUN pecl channel-update pecl.php.net \
+  && pecl install xdebug apcu
+
+RUN docker-php-ext-enable xdebug apcu\
+  && sed -i -e 's/^zend_extension/\;zend_extension/g' /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+## Replace next lines with below commented out version once issue is resolved
+# https://github.com/php/pecl-networking-ssh2/pull/36
+# https://bugs.php.net/bug.php?id=78560
+RUN curl -o /tmp/ssh2-1.2.tgz https://pecl.php.net/get/ssh2 \
+  && pear install /tmp/ssh2-1.2.tgz \
+  && rm /tmp/ssh2-1.2.tgz \
+  && docker-php-ext-enable ssh2
+#RUN pecl install ssh2-1.2 \
+#  && docker-php-ext-enable ssh2
+
+RUN groupadd -g 1000 app \
+ && useradd -g 1000 -u 1000 -d /var/www -s /bin/bash app
+
+#Install grunt
+# RUN apt-get install -y gnupg \
+#   && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+#   && apt-get install -y nodejs \
+#   && mkdir /var/www/.config /var/www/.npm \
+#   && chown app:app /var/www/.config /var/www/.npm \
+#   && npm install -g grunt-cli
+
+#Install sonar-scanner
+# RUN curl -L -O https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip \
+#   && unzip sonar-scanner-cli-4.7.0.2747-linux.zip \
+#   && rm -rf sonar-scanner-cli-4.7.0.2747-linux.zip \
+#   && mv sonar-scanner-4.7.0.2747-linux /usr/local/sonar-scanner
+# ENV PATH /usr/local/sonar-scanner/bin:$PATH
+
+#Install mhsendmail for mailhog
+# RUN apt-get update \
+#   && apt-get install --no-install-recommends -y ca-certificates curl git nano \
+#   && rm -rf /var/lib/apt/lists/* \
+#   && curl -Lsf 'https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz' | tar -C '/usr/local' -xvzf -
+# ENV PATH /usr/local/go/bin:$PATH
+# RUN go get github.com/mailhog/mhsendmail \
+#   && cp /root/go/bin/mhsendmail /usr/local/bin/mhsendmail
+# RUN curl -sSLO https://github.com/mailhog/mhsendmail/releases/download/v0.2.0/mhsendmail_linux_amd64 \
+#   && chmod +x mhsendmail_linux_amd64 \
+#   && mv mhsendmail_linux_amd64 /usr/local/bin/mhsendmail
+
+#Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+#Install Blackfire (Optional)
+#RUN curl -s https://packages.blackfire.io/gpg.key | apt-key add - \
+#  && echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list \
+#  && apt-get update \
+#  && apt-get install blackfire-agent blackfire-php
+
+COPY conf/www.conf /usr/local/etc/php-fpm.d/
+COPY conf/php.ini /usr/local/etc/php/
+COPY conf/php-fpm.conf /usr/local/etc/
+COPY bin/cronstart /usr/local/bin/
+
+RUN mkdir -p /etc/nginx/html /var/www/html /sock \
+  && chown -R app:app /etc/nginx /var/www /usr/local/etc/php/conf.d /sock
+
+USER app:app
+
+VOLUME /var/www
+
+WORKDIR /var/www/html
+
+EXPOSE 9001

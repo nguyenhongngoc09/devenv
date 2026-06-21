@@ -2,12 +2,16 @@
 echo "Correcting filesystem permissions..."
 
 if [ -z "$1" ]; then
-  bin/clinotty find vendor -type f -exec chmod u+w {} \;
-  bin/clinotty find vendor -type d -exec chmod u+w {} \;
-  bin/clinotty chmod u+x bin/console
+  TARGET="projects"
 else
-  bin/clinotty find $1 -type f -exec chmod u+w {} \;
-  bin/clinotty find $1 -type d -exec chmod u+w {} \;
+  TARGET="$1"
+fi
+
+bin/clinotty find "$TARGET" -type f -exec chmod u+w {} \;
+bin/clinotty find "$TARGET" -type d -exec chmod u+w {} \;
+
+if bin/clinotty test -f "$TARGET/bin/console"; then
+  bin/clinotty chmod u+x "$TARGET/bin/console"
 fi
 
 echo "Filesystem permissions corrected."

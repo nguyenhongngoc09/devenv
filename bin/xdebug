@@ -8,5 +8,5 @@ elif [ "$1" == "enable" ]; then
   bin/restart
   echo "Xdebug has been enabled."
 else
-  echo "Please specify either 'enable' or 'disable' as an argument"
+  echo "Please specify either 'enable' or 'disable'"
 fi
